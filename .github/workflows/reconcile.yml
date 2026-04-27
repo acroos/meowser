@@ -15,7 +15,7 @@ jobs:
     outputs:
       matrix: ${{ steps.list.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - id: list
         run: ./scripts/list-tracked-repos.sh
 
@@ -26,7 +26,7 @@ jobs:
       matrix: ${{ fromJSON(needs.enumerate.outputs.matrix) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - id: load_prompt
         env:
           PROMPT_FILE: prompts/reconcile.md

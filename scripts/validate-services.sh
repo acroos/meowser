@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# Validates every services/*.md frontmatter against schema/service.schema.json.
-# Emits a GitHub Actions error annotation per failing file, then exits non-zero
-# at the end. We do NOT exit on first failure so reviewers see all problems
-# in a single CI run.
+# Checks that the YAML frontmatter of every services/*.md file matches
+# schema/service.schema.json.
+#
+# Each failure becomes a GitHub Actions error annotation (so it shows up
+# inline on the PR), and we keep going after the first failure so a single
+# CI run reports every broken file at once. Exit code is non-zero if any
+# file failed.
 set -euo pipefail
 shopt -s nullglob
 

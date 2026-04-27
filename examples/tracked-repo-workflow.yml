@@ -1,8 +1,12 @@
 # .github/workflows/notify-meowser.yml
-# Copy this file into your repo at .github/workflows/notify-meowser.yml
-# and copy examples/notify-meowser.sh into .github/scripts/notify-meowser.sh.
-# Then replace <MEOWSER_OWNER> below with the GitHub username or org that owns
-# your meowser fork.
+# Drop-in workflow for a tracked repo. Copy this file into your repo at
+# .github/workflows/notify-meowser.yml, then replace <MEOWSER_OWNER> with
+# the GitHub user or org that owns your meowser fork.
+#
+# All the real work (building the dispatch payload, calling the GitHub
+# API) lives in meowser's reusable workflow at
+# <MEOWSER_OWNER>/meowser/.github/workflows/notify.yml — that way payload
+# changes ship via a meowser tag bump, not edits to every tracked repo.
 name: Notify meowser
 
 on:
@@ -13,16 +17,8 @@ on:
 jobs:
   notify:
     if: ${{ github.event.pull_request.merged == true }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # Fetch enough history that base_sha and merge_commit_sha are both reachable.
-          fetch-depth: 0
-
-      - name: Notify meowser
-        env:
-          GH_TOKEN: ${{ secrets.MEOWSER_DISPATCH_TOKEN }}
-          MEOWSER_OWNER: <MEOWSER_OWNER>   # replace at adoption time
-          DIFF_BYTES: 50000
-        run: ./.github/scripts/notify-meowser.sh
+    uses: <MEOWSER_OWNER>/meowser/.github/workflows/notify.yml@v1
+    with:
+      meowser-owner: <MEOWSER_OWNER>
+    secrets:
+      dispatch-token: ${{ secrets.MEOWSER_DISPATCH_TOKEN }}

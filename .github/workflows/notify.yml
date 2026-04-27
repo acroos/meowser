@@ -1,0 +1,50 @@
+# Reusable workflow that tracked repos call to notify meowser when a PR
+# merges. Tracked repos add a ~10-line caller workflow (see
+# examples/tracked-repo-workflow.yml) instead of copying the dispatch
+# script themselves — that way payload changes ship via a tag bump here
+# rather than a copy-paste sweep across every tracked repo.
+name: Notify meowser
+
+on:
+  workflow_call:
+    inputs:
+      meowser-owner:
+        description: GitHub user or org that owns the meowser repo to dispatch to.
+        type: string
+        required: true
+      diff-bytes:
+        description: Maximum diff size (bytes) to include in the dispatch payload.
+        type: number
+        required: false
+        default: 50000
+    secrets:
+      dispatch-token:
+        description: Fine-grained PAT with Contents:write on the meowser repo.
+        required: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the tracked repo
+        uses: actions/checkout@v6
+        with:
+          # Need full history so base_sha and merge_commit_sha are reachable
+          # for the diff we attach to the dispatch payload.
+          fetch-depth: 0
+
+      - name: Check out notify-meowser script
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.meowser-owner }}/meowser
+          path: .meowser
+          # Pull only the script — meowser's full tree isn't needed
+          sparse-checkout: |
+            scripts/notify-meowser.sh
+
+      - name: Send dispatch
+        env:
+          GH_TOKEN: ${{ secrets.dispatch-token }}
+          MEOWSER_OWNER: ${{ inputs.meowser-owner }}
+          DIFF_BYTES: ${{ inputs.diff-bytes }}
+        run: ./.meowser/scripts/notify-meowser.sh

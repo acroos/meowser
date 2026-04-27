@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# Posts a `meowser-update` repository_dispatch at the meowser repo with the
-# diff and PR metadata for a just-merged PR. Reads PR fields from
-# $GITHUB_EVENT_PATH (set by GitHub Actions) so we never round-trip strings
-# through YAML interpolation.
+# Tells meowser that a PR just merged in this repo, so it can update its
+# catalog entry for us.
+#
+# Sends a `meowser-update` repository_dispatch event to the meowser repo
+# containing the PR's metadata and diff. PR fields are read from the
+# GitHub Actions event payload ($GITHUB_EVENT_PATH) and the payload is
+# built with jq, so arbitrary PR titles/bodies/diffs are escaped safely
+# instead of being interpolated through YAML.
 set -euo pipefail
 
 EVENT="${GITHUB_EVENT_PATH:?GITHUB_EVENT_PATH must be set (run under GitHub Actions)}"

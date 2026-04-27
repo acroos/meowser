@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Misconfiguration trap and cost cap. NOT a security control — see SECURITY.md.
-# Exits non-zero if the dispatching repo isn't listed in tracked-repos.yml.
+# Fails the workflow if the repo that sent this dispatch isn't listed in
+# tracked-repos.yml. This is a sanity check to catch typos and runaway costs,
+# not a security boundary — see SECURITY.md for the real auth model.
 set -euo pipefail
 
 : "${DISPATCH_REPO:?DISPATCH_REPO must be set (the client_payload.repo value)}"

@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Reads a prompt file into a workflow output. Used by both the update and
-# reconcile workflows so the prompt body can be interpolated into the
-# claude-code-action `prompt:` input. The heredoc-style multi-line GitHub
-# Actions output format requires a delimiter that does not appear in the body.
+# Loads a prompt file (e.g. prompts/update.md) into a GitHub Actions step
+# output so a later step can pass it to claude-code-action's `prompt:` input.
+#
+# Prompts are multi-line markdown, so we use the multi-line output format
+# ("key<<DELIM\n...body...\nDELIM"). The delimiter is randomized to make
+# sure it can't accidentally appear inside the prompt body.
 set -euo pipefail
 
 : "${PROMPT_FILE:?PROMPT_FILE must be set (e.g. prompts/update.md)}"

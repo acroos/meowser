@@ -32,26 +32,22 @@ In your tracked repo: **Settings → Secrets and variables → Actions → New r
 
 ---
 
-## Step 3 — Copy the dispatch snippet into your repo
+## Step 3 — Add the dispatch workflow to your repo
 
-Copy two files from the meowser repo into your tracked repo:
+Copy one file from the meowser repo into your tracked repo:
 
 | Source (meowser) | Destination (your repo) |
 | --- | --- |
 | `examples/tracked-repo-workflow.yml` | `.github/workflows/notify-meowser.yml` |
-| `examples/notify-meowser.sh` | `.github/scripts/notify-meowser.sh` |
 
-Then edit `.github/workflows/notify-meowser.yml` and replace `<MEOWSER_OWNER>` with the GitHub username or org that owns your meowser fork.
+Then edit it:
 
-If your default branch isn't `main`, also update the `branches:` list in that workflow.
+- Replace both `<MEOWSER_OWNER>` placeholders with the GitHub username or org that owns your meowser fork.
+- If your default branch isn't `main`, update the `branches:` list.
 
-Make the script executable:
+The workflow is just a thin caller — the dispatch logic lives in meowser's reusable workflow (`.github/workflows/notify.yml`) and is pulled in via `uses:`. That way, when meowser changes its dispatch payload, you don't need to copy a new script — you just bump the `@v1` ref.
 
-```bash
-chmod +x .github/scripts/notify-meowser.sh
-```
-
-Commit and push both files.
+Commit and push the file.
 
 ---
 

@@ -55,8 +55,8 @@ Run these before pushing any branch that touches `services/` or `schema/`:
 ./scripts/validate-services.sh
 ```
 
-Run this before pushing any branch that touches `scripts/` or `examples/*.sh`:
+Run this before pushing any branch that touches `scripts/`:
 
 ```bash
-shellcheck scripts/*.sh examples/*.sh
+shellcheck scripts/*.sh
 ```
