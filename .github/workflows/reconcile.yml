@@ -1,0 +1,47 @@
+name: Daily reconciliation
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  enumerate:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: list
+        run: ./scripts/list-tracked-repos.sh
+
+  reconcile:
+    needs: enumerate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.enumerate.outputs.matrix) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - id: load_prompt
+        env:
+          PROMPT_FILE: prompts/reconcile.md
+          OUTPUT_KEY: body
+        run: ./scripts/load-prompt.sh
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --model ${{ vars.MEOWSER_RECONCILE_MODEL || 'claude-opus-4-7' }}
+            --max-turns ${{ vars.MEOWSER_RECONCILE_MAX_TURNS || '30' }}
+            --allowedTools Edit,Read,Write,Glob,Grep,Bash
+          prompt: |
+            ${{ steps.load_prompt.outputs.body }}
+
+            ## Target
+
+            Reconcile the catalog entry for: ${{ matrix.repo }}
