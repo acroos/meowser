@@ -49,4 +49,14 @@ Each locked design choice has a record under `docs/decisions/`. Check the releva
 
 ## Pre-push checks
 
-_This section will be populated in Phase 5 once the validate workflow and scripts are in place._
+Run these before pushing any branch that touches `services/` or `schema/`:
+
+```bash
+./scripts/validate-services.sh
+```
+
+Run this before pushing any branch that touches `scripts/` or `examples/*.sh`:
+
+```bash
+shellcheck scripts/*.sh examples/*.sh
+```

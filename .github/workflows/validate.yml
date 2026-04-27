@@ -1,0 +1,15 @@
+name: Validate catalog
+
+on:
+  pull_request:
+    paths:
+      - 'services/**'
+      - 'schema/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate every service.md frontmatter
+        run: ./scripts/validate-services.sh
