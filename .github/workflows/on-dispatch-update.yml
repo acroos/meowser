@@ -1,0 +1,58 @@
+name: Update from tracked repo
+
+on:
+  repository_dispatch:
+    types: [meowser-update]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Allowlist gate
+        env:
+          DISPATCH_REPO: ${{ github.event.client_payload.repo }}
+        run: ./scripts/check-allowlist.sh
+
+      - id: load_prompt
+        env:
+          PROMPT_FILE: prompts/update.md
+          OUTPUT_KEY: body
+        run: ./scripts/load-prompt.sh
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --model ${{ vars.MEOWSER_MODEL || 'claude-sonnet-4-6' }}
+            --max-turns ${{ vars.MEOWSER_MAX_TURNS || '12' }}
+            --allowedTools Edit,Read,Write,Glob,Grep
+          prompt: |
+            ${{ steps.load_prompt.outputs.body }}
+
+            ## Change context
+
+            - Source repo: ${{ github.event.client_payload.repo }}
+            - PR: #${{ github.event.client_payload.pr_number }} — "${{ github.event.client_payload.pr_title }}"
+            - PR author: @${{ github.event.client_payload.actor }}
+            - Merge commit: ${{ github.event.client_payload.merge_commit_sha }}
+            - Changed files: ${{ toJSON(github.event.client_payload.changed_files) }}
+
+            ## PR description
+
+            ${{ github.event.client_payload.pr_body }}
+
+            ## Diff (base..merge)
+
+            ```diff
+            ${{ github.event.client_payload.diff }}
+            ```
+
+            When you open the PR, include this line in the body so the change author is notified:
+
+            > cc @${{ github.event.client_payload.actor }} — catalog updates from ${{ github.event.client_payload.repo }}#${{ github.event.client_payload.pr_number }}.

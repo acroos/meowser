@@ -1,0 +1,6 @@
+# Allowlist of repos meowser will accept repository_dispatch events from.
+# Adding a repo here doesn't require any code changes — workflows read this
+# file at runtime to gate incoming events and to enumerate the reconcile matrix.
+# A repo's catalog entries are discovered by the agent via the `repo:` field
+# in each services/*.md frontmatter — there is no separate index to maintain.
+repos: []
