@@ -1,0 +1,28 @@
+# .github/workflows/notify-meowser.yml
+# Copy this file into your repo at .github/workflows/notify-meowser.yml
+# and copy examples/notify-meowser.sh into .github/scripts/notify-meowser.sh.
+# Then replace <MEOWSER_OWNER> below with the GitHub username or org that owns
+# your meowser fork.
+name: Notify meowser
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]   # change to your default branch if not 'main'
+
+jobs:
+  notify:
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Fetch enough history that base_sha and merge_commit_sha are both reachable.
+          fetch-depth: 0
+
+      - name: Notify meowser
+        env:
+          GH_TOKEN: ${{ secrets.MEOWSER_DISPATCH_TOKEN }}
+          MEOWSER_OWNER: <MEOWSER_OWNER>   # replace at adoption time
+          DIFF_BYTES: 50000
+        run: ./.github/scripts/notify-meowser.sh
